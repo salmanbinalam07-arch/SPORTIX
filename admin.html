@@ -1,34 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>SPORTIX Admin</title>
-</head>
-<body>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-<h2>SPORTIX Admin Login</h2>
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyAn7HUDfK0luw6PtqfBSMkfokNJ18N43z4",
+    authDomain: "sportix-3ad91.firebaseapp.com",
+    projectId: "sportix-3ad91",
+    storageBucket: "sportix-3ad91.firebasestorage.app",
+    messagingSenderId: "1067249243356",
+    appId: "1:1067249243356:web:ff1b423010f7cedaa21019",
+    measurementId: "G-Y71YYLJGJ3"
+  };
 
-<input type="email" id="email" placeholder="Admin Email">
-<br><br>
-
-<input type="password" id="password" placeholder="Password">
-<br><br>
-
-<button onclick="login()">Login</button>
-
-<p id="message"></p>
-
-<script>
-function login(){
-  let email = document.getElementById("email").value;
-  let password = document.getElementById("password").value;
-
-  if(email && password){
-    document.getElementById("message").innerHTML = "Login checking...";
-  } else {
-    document.getElementById("message").innerHTML = "Email and password required";
-  }
-}
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
 </script>
-
-</body>
-</html>
