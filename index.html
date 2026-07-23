@@ -458,9 +458,17 @@ matchGrid.innerHTML += `
 
 <div class="match-card">
 
-<h3>${match.title}</h3>
+<img src="${match.leagueLogo}" width="40">
 
-<p>${match.team1} VS ${match.team2}</p>
+<h4>${match.league}</h4>
+
+<img src="${match.team1Logo}" width="60">
+<h3>${match.team1}</h3>
+
+<p>VS</p>
+
+<img src="${match.team2Logo}" width="60">
+<h3>${match.team2}</h3>
 
 <p>⏰ ${match.time}</p>
 
