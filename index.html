@@ -422,6 +422,64 @@
     </div>
 
     <!-- JAVASCRIPT -->
-    <script src="script.js"></script>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAn7HUDfK0luw6PtqfBSMkfokNJ18N43z4",
+  authDomain: "sportix-3ad91.firebaseapp.com",
+  projectId: "sportix-3ad91",
+  storageBucket: "sportix-3ad91.firebasestorage.app",
+  messagingSenderId: "1067249243356",
+  appId: "1:1067249243356:web:ff1b423010f7cedaa21019"
+};
+
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+const matchGrid = document.getElementById("liveMatchesGrid");
+
+
+const querySnapshot = await getDocs(collection(db,"matches"));
+
+
+querySnapshot.forEach((doc)=>{
+
+let match = doc.data();
+
+matchGrid.innerHTML += `
+
+<div class="match-card">
+
+<h3>${match.title}</h3>
+
+<p>${match.team1} VS ${match.team2}</p>
+
+<p>⏰ ${match.time}</p>
+
+<p>Status: ${match.status}</p>
+
+<a href="${match.link}" target="_blank">
+<button>WATCH LIVE</button>
+</a>
+
+</div>
+
+`;
+
+});
+
+</script>
+
+
+<script src="script.js"></script>
+
 </body>
 </html>
