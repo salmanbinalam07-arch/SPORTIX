@@ -883,13 +883,12 @@ img {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    width: 100%;
+    gap: 8px;
     margin: 20px auto;
-    background: rgba(255, 255, 255, 0.03);
+    width: fit-content;
+    background: rgba(255,255,255,0.03);
     padding: 4px;
-    border-radius: var(--radius-full);
+    border-radius: 999px;
     border: 1px solid var(--border-glass);
 }
 
