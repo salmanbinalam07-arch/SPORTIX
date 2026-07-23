@@ -8,6 +8,8 @@
 
 <h1>SPORTIX Admin</h1>
 
+<div id="loginBox">
+
 <input type="email" id="email" placeholder="Admin Email">
 <br><br>
 
@@ -17,6 +19,41 @@
 <button id="loginBtn">Login</button>
 
 <p id="msg"></p>
+
+</div>
+
+
+<div id="dashboard" style="display:none;">
+
+<h2>SPORTIX Dashboard</h2>
+
+<input type="text" id="title" placeholder="Match Title">
+<br><br>
+
+<input type="text" id="team1" placeholder="Team 1">
+<br><br>
+
+<input type="text" id="team2" placeholder="Team 2">
+<br><br>
+
+<input type="text" id="time" placeholder="Match Time">
+<br><br>
+
+<input type="text" id="link" placeholder="Live Link">
+<br><br>
+
+<select id="status">
+  <option value="live">Live</option>
+  <option value="upcoming">Upcoming</option>
+  <option value="finished">Finished</option>
+</select>
+
+<br><br>
+
+<button>Add Match</button>
+
+</div>
+
 
 
 <script type="module">
@@ -39,20 +76,33 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 
+
 document.getElementById("loginBtn").onclick = () => {
 
   let email = document.getElementById("email").value;
   let password = document.getElementById("password").value;
 
+
   signInWithEmailAndPassword(auth, email, password)
+
   .then(() => {
+
     document.getElementById("msg").innerHTML = "Login Success";
+
+    document.getElementById("loginBox").style.display = "none";
+
+    document.getElementById("dashboard").style.display = "block";
+
   })
+
   .catch((error) => {
+
     document.getElementById("msg").innerHTML = error.message;
+
   });
 
 };
+
 
 </script>
 
