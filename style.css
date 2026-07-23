@@ -880,16 +880,11 @@ img {
 
 /* --- LIVE MATCHES GRID --- */
 .filter-tab-group {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin: 20px auto;
-    width: fit-content;
-    background: rgba(255,255,255,0.03);
-    padding: 4px;
-    border-radius: 999px;
-    border: 1px solid var(--border-glass);
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
 }
 
 .filter-btn {
