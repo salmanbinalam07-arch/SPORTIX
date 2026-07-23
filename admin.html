@@ -51,6 +51,9 @@
 <br><br>
 
 <button id="addMatchBtn">Add Match</button>
+
+<p id="saveMsg"></p>
+
 </div>
 
 
@@ -58,7 +61,17 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+import { 
+getAuth, 
+signInWithEmailAndPassword 
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+import { 
+getFirestore, 
+collection, 
+addDoc 
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
@@ -72,35 +85,83 @@ const firebaseConfig = {
 
 
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
+
+const db = getFirestore(app);
 
 
 
 document.getElementById("loginBtn").onclick = () => {
 
-  let email = document.getElementById("email").value;
-  let password = document.getElementById("password").value;
+let email = document.getElementById("email").value;
+
+let password = document.getElementById("password").value;
 
 
-  signInWithEmailAndPassword(auth, email, password)
+signInWithEmailAndPassword(auth,email,password)
 
-  .then(() => {
+.then(()=>{
 
-    document.getElementById("msg").innerHTML = "Login Success";
+document.getElementById("msg").innerHTML="Login Success";
 
-    document.getElementById("loginBox").style.display = "none";
+document.getElementById("loginBox").style.display="none";
 
-    document.getElementById("dashboard").style.display = "block";
+document.getElementById("dashboard").style.display="block";
 
-  })
+})
 
-  .catch((error) => {
 
-    document.getElementById("msg").innerHTML = error.message;
+.catch((error)=>{
 
-  });
+document.getElementById("msg").innerHTML=error.message;
+
+});
 
 };
+
+
+
+
+
+document.getElementById("addMatchBtn").onclick = async () => {
+
+
+try{
+
+
+await addDoc(collection(db,"matches"),{
+
+title: document.getElementById("title").value,
+
+team1: document.getElementById("team1").value,
+
+team2: document.getElementById("team2").value,
+
+time: document.getElementById("time").value,
+
+link: document.getElementById("link").value,
+
+status: document.getElementById("status").value
+
+
+});
+
+
+document.getElementById("saveMsg").innerHTML="Match Added Successfully";
+
+
+}
+
+catch(error){
+
+document.getElementById("saveMsg").innerHTML=error.message;
+
+}
+
+
+};
+
 
 
 </script>
