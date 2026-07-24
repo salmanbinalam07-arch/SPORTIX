@@ -1,135 +1,184 @@
 /**
  * SPORTIX v2 FINAL - Master Application Script
- * Features: Dynamic Firebase/Admin Ready Data, Interactive Canvas, Dynamic Search, FB Unlock Popup, Custom Video Player
+ * Features: Interactive Canvas, Live Data Mock, Dynamic Search, FB Unlock Popup, Custom Video Player
  */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. DYNAMIC DATA STRUCTURE (EMPTY FOR FIREBASE / ADMIN PANEL FEED) ---
-    let MATCHES_DATA = [];
-    let LEAGUES_DATA = [];
-    let HIGHLIGHTS_DATA = [];
-    let SCHEDULE_DATA = [];
+    // --- 1. DYNAMIC MATCH DATA (JSON MOCK) ---
+    const MATCHES_DATA = [
+        {
+            id: 'm1',
+            league: 'Premier League',
+            leagueIcon: 'images/league1.png',
+            homeTeam: 'Arsenal',
+            awayTeam: 'Chelsea',
+            homeLogo: 'images/team1.png',
+            awayLogo: 'images/team2.png',
+            time: '82\'',
+            status: 'LIVE',
+            category: 'football',
+            thumb: 'images/match1.jpg',
+            streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+        },
+        {
+            id: 'm2',
+            league: 'UEFA Champions League',
+            leagueIcon: 'images/league2.png',
+            homeTeam: 'Barcelona',
+            awayTeam: 'Bayern Munich',
+            homeLogo: 'images/team2.png',
+            awayLogo: 'images/team1.png',
+            time: '45+2\'',
+            status: 'LIVE',
+            category: 'football',
+            thumb: 'images/match2.jpg',
+            streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4'
+        },
+        {
+            id: 'm3',
+            league: 'NBA Finals',
+            leagueIcon: 'images/league1.png',
+            homeTeam: 'Lakers',
+            awayTeam: 'Celtics',
+            homeLogo: 'images/team1.png',
+            awayLogo: 'images/team2.png',
+            time: 'Q3 - 04:12',
+            status: 'LIVE',
+            category: 'basketball',
+            thumb: 'images/match3.jpg',
+            streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
+        },
+        {
+            id: 'm4',
+            league: 'IPL Cricket',
+            leagueIcon: 'images/league2.png',
+            homeTeam: 'CSK',
+            awayTeam: 'RCB',
+            homeLogo: 'images/team2.png',
+            awayLogo: 'images/team1.png',
+            time: '14.2 Overs',
+            status: 'LIVE',
+            category: 'cricket',
+            thumb: 'images/match1.jpg',
+            streamUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4'
+        }
+    ];
+
+    const LEAGUES_DATA = [
+        { name: 'Premier League', icon: 'images/league1.png' },
+        { name: 'Champions League', icon: 'images/league2.png' },
+        { name: 'La Liga', icon: 'images/league1.png' },
+        { name: 'Serie A', icon: 'images/league2.png' },
+        { name: 'Bundesliga', icon: 'images/league1.png' },
+        { name: 'Ligue 1', icon: 'images/league2.png' },
+        { name: 'IPL Cricket', icon: 'images/league1.png' },
+        { name: 'NBA', icon: 'images/league2.png' }
+    ];
+
+    const HIGHLIGHTS_DATA = [
+        { title: 'Real Madrid vs Man City [4-3] All Goals & Highlights', duration: '10:45', thumb: 'images/match1.jpg' },
+        { title: 'Lakers vs Celtics Game 7 Clutch Moments', duration: '08:20', thumb: 'images/match3.jpg' },
+        { title: 'Barcelona 3-2 Bayern Munich Epic Comeback', duration: '12:15', thumb: 'images/match2.jpg' }
+    ];
+
+    const SCHEDULE_DATA = [
+        { league: 'Premier League', leagueIcon: 'images/league1.png', home: 'Liverpool', away: 'Man City', time: '18:30 UTC' },
+        { league: 'La Liga', leagueIcon: 'images/league2.png', home: 'Real Madrid', away: 'Atlético', time: '20:00 UTC' },
+        { league: 'Serie A', leagueIcon: 'images/league1.png', home: 'Inter', away: 'AC Milan', time: '21:45 UTC' }
+    ];
 
     let pendingMatchToWatch = null;
     let fbUnlocked = false;
 
-    // Window object-e expose kora holo jeno Firebase/Admin script theke easily data update & render kora jay
-    window.SPORTIX_DATA = {
-        matches: MATCHES_DATA,
-        leagues: LEAGUES_DATA,
-        highlights: HIGHLIGHTS_DATA,
-        schedule: SCHEDULE_DATA,
-        renderAll: () => {
-            renderLiveMatches();
-            renderLeagues();
-            renderHighlights();
-            renderSchedule();
-        }
-    };
-
     // --- 2. CANVAS STADIUM PARTICLES BG ---
     const canvas = document.getElementById('stadium-canvas');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+    const ctx = canvas.getContext('2d');
+    let particles = [];
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedY = Math.random() * 0.5 + 0.1;
-                this.opacity = Math.random() * 0.5 + 0.2;
-            }
-            update() {
-                this.y -= this.speedY;
-                if (this.y < 0) this.reset();
-            }
-            draw() {
-                ctx.fillStyle = `rgba(0, 240, 255, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < 60; i++) particles.push(new Particle());
-
-        function animateCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animateCanvas);
-        }
-        animateCanvas();
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
     }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+        reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.5;
+            this.speedY = Math.random() * 0.5 + 0.1;
+            this.opacity = Math.random() * 0.5 + 0.2;
+        }
+        update() {
+            this.y -= this.speedY;
+            if (this.y < 0) this.reset();
+        }
+        draw() {
+            ctx.fillStyle = `rgba(0, 240, 255, ${this.opacity})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+    function animateCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        requestAnimationFrame(animateCanvas);
+    }
+    animateCanvas();
 
     // --- 3. LOADER FADE OUT ---
     window.addEventListener('load', () => {
         setTimeout(() => {
             const loader = document.getElementById('loader');
-            if (loader) loader.classList.add('fade-out');
+            loader.classList.add('fade-out');
         }, 600);
     });
 
     // --- 4. RENDER TICKER BAR ---
     const tickerTrack = document.getElementById('tickerTrack');
-    if (tickerTrack) {
-        const tickerItems = [
-            'Welcome to <strong>SPORTIX</strong> Live Sports',
-            'Stay tuned for upcoming live streams',
-            'Follow our official Facebook page for live updates'
-        ];
-        tickerTrack.innerHTML = tickerItems.concat(tickerItems).map(item => `<div class="ticker-item">${item}</div>`).join('');
-    }
+    const tickerItems = [
+        '<strong>RMA 2 - 1 MCI</strong> (74\')',
+        '<strong>ARS 1 - 0 CHE</strong> (82\')',
+        '<strong>LAK 108 - 104 CEL</strong> (Q4)',
+        '<strong>CSK 165/4 - RCB 120/6</strong> (15.2 Ov)'
+    ];
+    tickerTrack.innerHTML = tickerItems.concat(tickerItems).map(item => `<div class="ticker-item">${item}</div>`).join('');
 
     // --- 5. RENDER DYNAMIC SECTIONS ---
     function renderLiveMatches(filter = 'all') {
         const grid = document.getElementById('liveMatchesGrid');
-        if (!grid) return;
-
         const filtered = filter === 'all' ? MATCHES_DATA : MATCHES_DATA.filter(m => m.category === filter);
         
-        if (filtered.length === 0) {
-            grid.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #94a3b8; background: rgba(15,23,42,0.6); border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px;">
-                    <p style="font-size: 1rem; font-weight: 600;">No live matches available right now.</p>
-                </div>
-            `;
-            return;
-        }
-
         grid.innerHTML = filtered.map(match => `
             <div class="match-card" data-match-id="${match.id}">
                 <div class="card-thumb-wrap">
-                    <img src="${match.thumb}" class="card-thumb-img" alt="${match.homeTeam} vs ${match.awayTeam}" onerror="this.src='images/match1.jpg'">
+                    <img src="${match.thumb}" class="card-thumb-img" alt="${match.homeTeam} vs ${match.awayTeam}">
                     <div class="card-league-badge">
-                        <img src="${match.leagueIcon}" alt="League" onerror="this.style.display='none'">
+                        <img src="${match.leagueIcon}" alt="League">
                         <span>${match.league}</span>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="card-teams-row">
                         <div class="card-team">
-                            <img src="${match.homeLogo}" class="card-team-logo" alt="${match.homeTeam}" onerror="this.src='https://via.placeholder.com/40'">
+                            <img src="${match.homeLogo}" class="card-team-logo" alt="${match.homeTeam}">
                             <span class="card-team-name">${match.homeTeam}</span>
                         </div>
                         <span class="card-vs">VS</span>
                         <div class="card-team">
-                            <img src="${match.awayLogo}" class="card-team-logo" alt="${match.awayTeam}" onerror="this.src='https://via.placeholder.com/40'">
+                            <img src="${match.awayLogo}" class="card-team-logo" alt="${match.awayTeam}">
                             <span class="card-team-name">${match.awayTeam}</span>
                         </div>
                     </div>
@@ -152,16 +201,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderLeagues() {
         const grid = document.getElementById('leaguesGrid');
-        if (!grid) return;
-
-        if (LEAGUES_DATA.length === 0) {
-            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 20px;">No leagues added yet.</div>`;
-            return;
-        }
-
         grid.innerHTML = LEAGUES_DATA.map(l => `
             <div class="league-card">
-                <img src="${l.icon}" class="league-icon" alt="${l.name}" onerror="this.style.display='none'">
+                <img src="${l.icon}" class="league-icon" alt="${l.name}">
                 <span class="league-card-title">${l.name}</span>
             </div>
         `).join('');
@@ -169,17 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderHighlights() {
         const grid = document.getElementById('highlightsGrid');
-        if (!grid) return;
-
-        if (HIGHLIGHTS_DATA.length === 0) {
-            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 20px;">No highlights available.</div>`;
-            return;
-        }
-
         grid.innerHTML = HIGHLIGHTS_DATA.map(h => `
             <div class="highlight-card">
                 <div class="highlight-thumb">
-                    <img src="${h.thumb}" alt="${h.title}" onerror="this.src='images/match1.jpg'">
+                    <img src="${h.thumb}" alt="${h.title}">
                     <span class="highlight-duration">${h.duration}</span>
                 </div>
                 <div class="highlight-title">${h.title}</div>
@@ -189,17 +224,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderSchedule() {
         const list = document.getElementById('scheduleList');
-        if (!list) return;
-
-        if (SCHEDULE_DATA.length === 0) {
-            list.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 20px;">No upcoming schedules.</div>`;
-            return;
-        }
-
         list.innerHTML = SCHEDULE_DATA.map(s => `
             <div class="schedule-row">
                 <div class="schedule-league-info">
-                    <img src="${s.leagueIcon}" class="schedule-league-icon" alt="${s.league}" onerror="this.style.display='none'">
+                    <img src="${s.leagueIcon}" class="schedule-league-icon" alt="${s.league}">
                     <span class="schedule-league-name">${s.league}</span>
                 </div>
                 <div class="schedule-teams">
@@ -231,13 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 7. FEATURED MATCH CLICK ---
     const featuredCard = document.getElementById('featuredMatchCard');
-    if (featuredCard) {
-        featuredCard.addEventListener('click', () => {
-            if (MATCHES_DATA.length > 0) {
-                triggerMatchClick(MATCHES_DATA[0].id);
-            }
-        });
-    }
+    featuredCard.addEventListener('click', () => {
+        triggerMatchClick('m1');
+    });
 
     // --- 8. MATCH CLICK FLOW (FACEBOOK GATEWAY) ---
     const facebookModal = document.getElementById('facebookModal');
@@ -246,48 +270,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const continueWatchBtn = document.getElementById('continueWatchBtn');
 
     function triggerMatchClick(matchId) {
-        pendingMatchToWatch = MATCHES_DATA.find(m => m.id === matchId) || (MATCHES_DATA.length > 0 ? MATCHES_DATA[0] : null);
-
-        if (!pendingMatchToWatch) return;
+        pendingMatchToWatch = MATCHES_DATA.find(m => m.id === matchId) || MATCHES_DATA[0];
 
         if (fbUnlocked) {
             openVideoPlayer(pendingMatchToWatch);
         } else {
-            if (facebookModal) facebookModal.classList.add('active');
+            facebookModal.classList.add('active');
         }
     }
 
-    if (followFbBtn) {
-        followFbBtn.addEventListener('click', () => {
-            setTimeout(() => {
-                if (continueWatchBtn) continueWatchBtn.classList.add('show');
-            }, 1000);
-        });
-    }
+    followFbBtn.addEventListener('click', () => {
+        // Show continue button after clicking FB link
+        setTimeout(() => {
+            continueWatchBtn.classList.add('show');
+        }, 1000);
+    });
 
-    if (continueWatchBtn) {
-        continueWatchBtn.addEventListener('click', () => {
-            fbUnlocked = true;
-            if (facebookModal) facebookModal.classList.remove('active');
-            if (pendingMatchToWatch) {
-                openVideoPlayer(pendingMatchToWatch);
-            }
-        });
-    }
+    continueWatchBtn.addEventListener('click', () => {
+        fbUnlocked = true;
+        facebookModal.classList.remove('active');
+        if (pendingMatchToWatch) {
+            openVideoPlayer(pendingMatchToWatch);
+        }
+    });
 
-    if (closeFbModal) {
-        closeFbModal.addEventListener('click', () => {
-            if (facebookModal) facebookModal.classList.remove('active');
-        });
-    }
+    closeFbModal.addEventListener('click', () => {
+        facebookModal.classList.remove('active');
+    });
 
     // --- 9. VIDEO PLAYER CONTROLS ---
     const videoModal = document.getElementById('videoPlayerModal');
     const closeVideoModal = document.getElementById('closeVideoModal');
     const video = document.getElementById('sportixVideo');
     const playPauseBtn = document.getElementById('playPauseBtn');
-    const iconPlay = playPauseBtn ? playPauseBtn.querySelector('.icon-play') : null;
-    const iconPause = playPauseBtn ? playPauseBtn.querySelector('.icon-pause') : null;
+    const iconPlay = playPauseBtn.querySelector('.icon-play');
+    const iconPause = playPauseBtn.querySelector('.icon-pause');
     const progressBarFilled = document.getElementById('progressBarFilled');
     const progressBarContainer = document.getElementById('progressBarContainer');
     const muteBtn = document.getElementById('muteBtn');
@@ -297,25 +314,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullscreenBtn = document.getElementById('fullscreenBtn');
 
     function openVideoPlayer(match) {
-        if (!match || !video) return;
-        const titleElem = document.getElementById('videoTitleText');
-        if (titleElem) titleElem.textContent = `${match.homeTeam} vs ${match.awayTeam}`;
-        
+        document.getElementById('videoTitleText').textContent = `${match.homeTeam} vs ${match.awayTeam}`;
         video.src = match.streamUrl;
-        if (videoModal) videoModal.classList.add('active');
-        video.play().catch(e => console.log("Autoplay prevented:", e));
+        videoModal.classList.add('active');
+        video.play();
         updatePlayIcons(true);
     }
 
     function closeVideoPlayer() {
-        if (video) video.pause();
-        if (videoModal) videoModal.classList.remove('active');
+        video.pause();
+        videoModal.classList.remove('active');
     }
 
-    if (closeVideoModal) closeVideoModal.addEventListener('click', closeVideoPlayer);
+    closeVideoModal.addEventListener('click', closeVideoPlayer);
 
     function togglePlay() {
-        if (!video) return;
         if (video.paused) {
             video.play();
             updatePlayIcons(true);
@@ -326,7 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updatePlayIcons(isPlaying) {
-        if (!iconPlay || !iconPause) return;
         if (isPlaying) {
             iconPlay.classList.add('hidden');
             iconPause.classList.remove('hidden');
@@ -336,73 +348,53 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlay);
-    if (video) {
-        video.addEventListener('click', togglePlay);
+    playPauseBtn.addEventListener('click', togglePlay);
+    video.addEventListener('click', togglePlay);
 
-        video.addEventListener('timeupdate', () => {
-            if (!video.duration) return;
-            const percent = (video.currentTime / video.duration) * 100;
-            if (progressBarFilled) progressBarFilled.style.width = `${percent}%`;
+    video.addEventListener('timeupdate', () => {
+        const percent = (video.currentTime / video.duration) * 100;
+        progressBarFilled.style.width = `${percent}%`;
 
-            if (timeDisplay) {
-                const curMin = Math.floor(video.currentTime / 60);
-                const curSec = Math.floor(video.currentTime % 60);
-                const durMin = Math.floor(video.duration / 60) || 0;
-                const durSec = Math.floor(video.duration % 60) || 0;
+        // Time display
+        const curMin = Math.floor(video.currentTime / 60);
+        const curSec = Math.floor(video.currentTime % 60);
+        const durMin = Math.floor(video.duration / 60) || 0;
+        const durSec = Math.floor(video.duration % 60) || 0;
 
-                timeDisplay.textContent = `${curMin.toString().padStart(2, '0')}:${curSec.toString().padStart(2, '0')} / ${durMin.toString().padStart(2, '0')}:${durSec.toString().padStart(2, '0')}`;
-            }
-        });
-    }
+        timeDisplay.textContent = `${curMin.toString().padStart(2, '0')}:${curSec.toString().padStart(2, '0')} / ${durMin.toString().padStart(2, '0')}:${durSec.toString().padStart(2, '0')}`;
+    });
 
-    if (progressBarContainer) {
-        progressBarContainer.addEventListener('click', (e) => {
-            if (!video || !video.duration) return;
-            const rect = progressBarContainer.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            video.currentTime = pos * video.duration;
-        });
-    }
+    progressBarContainer.addEventListener('click', (e) => {
+        const rect = progressBarContainer.getBoundingClientRect();
+        const pos = (e.clientX - rect.left) / rect.width;
+        video.currentTime = pos * video.duration;
+    });
 
-    if (volumeSlider) {
-        volumeSlider.addEventListener('input', (e) => {
-            if (!video) return;
-            video.volume = e.target.value;
-            video.muted = e.target.value === '0';
-        });
-    }
+    volumeSlider.addEventListener('input', (e) => {
+        video.volume = e.target.value;
+        video.muted = e.target.value === '0';
+    });
 
-    if (muteBtn) {
-        muteBtn.addEventListener('click', () => {
-            if (!video) return;
-            video.muted = !video.muted;
-            if (volumeSlider) volumeSlider.value = video.muted ? 0 : video.volume;
-        });
-    }
+    muteBtn.addEventListener('click', () => {
+        video.muted = !video.muted;
+        volumeSlider.value = video.muted ? 0 : video.volume;
+    });
 
-    if (pipBtn) {
-        pipBtn.addEventListener('click', async () => {
-            if (!video) return;
-            if (document.pictureInPictureElement) {
-                await document.exitPictureInPicture();
-            } else if (document.pictureInPictureEnabled) {
-                await video.requestPictureInPicture();
-            }
-        });
-    }
+    pipBtn.addEventListener('click', async () => {
+        if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+        } else if (document.pictureInPictureEnabled) {
+            await video.requestPictureInPicture();
+        }
+    });
 
-    if (fullscreenBtn) {
-        fullscreenBtn.addEventListener('click', () => {
-            const wrapper = document.getElementById('videoPlayerWrapper');
-            if (!wrapper) return;
-            if (!document.fullscreenElement) {
-                wrapper.requestFullscreen();
-            } else {
-                document.exitFullscreen();
-            }
-        });
-    }
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.getElementById('videoPlayerWrapper').requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    });
 
     // --- 10. SEARCH BAR INTERACTION ---
     const searchBtn = document.getElementById('searchBtn');
@@ -410,70 +402,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const matchSearchInput = document.getElementById('matchSearchInput');
     const searchResults = document.getElementById('searchResults');
 
-    if (searchBtn && searchDropdown) {
-        searchBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            searchDropdown.classList.toggle('active');
-            if (searchDropdown.classList.contains('active') && matchSearchInput) {
-                matchSearchInput.focus();
-            }
-        });
+    searchBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        searchDropdown.classList.toggle('active');
+        if (searchDropdown.classList.contains('active')) {
+            matchSearchInput.focus();
+        }
+    });
 
-        document.addEventListener('click', (e) => {
-            if (!searchDropdown.contains(e.target) && e.target !== searchBtn) {
+    document.addEventListener('click', (e) => {
+        if (!searchDropdown.contains(e.target) && e.target !== searchBtn) {
+            searchDropdown.classList.remove('active');
+        }
+    });
+
+    matchSearchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        if (!query) {
+            searchResults.innerHTML = '';
+            return;
+        }
+
+        const filtered = MATCHES_DATA.filter(m => 
+            m.homeTeam.toLowerCase().includes(query) || 
+            m.awayTeam.toLowerCase().includes(query) ||
+            m.league.toLowerCase().includes(query)
+        );
+
+        searchResults.innerHTML = filtered.length ? filtered.map(m => `
+            <div class="search-result-item" data-id="${m.id}">
+                <span>${m.homeTeam} vs ${m.awayTeam}</span>
+                <span class="highlight">${m.league}</span>
+            </div>
+        `).join('') : '<div style="padding:8px; font-size:0.8rem; color:#94a3b8;">No matches found.</div>';
+
+        document.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.getAttribute('data-id');
                 searchDropdown.classList.remove('active');
-            }
-        });
-    }
-
-    if (matchSearchInput && searchResults) {
-        matchSearchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            if (!query) {
-                searchResults.innerHTML = '';
-                return;
-            }
-
-            const filtered = MATCHES_DATA.filter(m => 
-                (m.homeTeam && m.homeTeam.toLowerCase().includes(query)) || 
-                (m.awayTeam && m.awayTeam.toLowerCase().includes(query)) ||
-                (m.league && m.league.toLowerCase().includes(query))
-            );
-
-            searchResults.innerHTML = filtered.length ? filtered.map(m => `
-                <div class="search-result-item" data-id="${m.id}">
-                    <span>${m.homeTeam} vs ${m.awayTeam}</span>
-                    <span class="highlight">${m.league}</span>
-                </div>
-            `).join('') : '<div style="padding:8px; font-size:0.8rem; color:#94a3b8;">No matches found.</div>';
-
-            document.querySelectorAll('.search-result-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const id = item.getAttribute('data-id');
-                    if (searchDropdown) searchDropdown.classList.remove('active');
-                    triggerMatchClick(id);
-                });
+                triggerMatchClick(id);
             });
         });
-    }
+    });
 
     // --- 11. MOBILE MENU TOGGLE ---
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
     const navMenu = document.getElementById('navMenu');
 
-    if (mobileMenuToggle && navMenu) {
-        mobileMenuToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
+    mobileMenuToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+    });
 
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                navMenu.classList.remove('active');
-            });
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            navMenu.classList.remove('active');
         });
-    }
+    });
 
     // --- 12. DYNAMIC YEAR ---
-    const yearElem = document.getElementById('currentYear');
-    if (yearElem) yearElem.textContent = new Date().getFullYear();
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
 });
