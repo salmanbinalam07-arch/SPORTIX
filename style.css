@@ -1636,7 +1636,28 @@ img {
     }
 
     .schedule-league-info, .schedule-teams, .schedule-time-btn {
-        width: 100%;
-        justify-content: center;
-    }
+    width: 100%;
+    justify-content: center;
+}
+
+}
+
+
+/* Firebase Dynamic Match Card Design */
+
+.match-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.match-card {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    transition: 0.3s ease;
+    box-shadow: 0 0 25px rgba(0,240,255,0.08);
 }
